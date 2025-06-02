@@ -1,0 +1,17 @@
+package ConexaoDataFraude;
+
+import static conexao_workbench.FechaConexaoMysql.fecharConnection;
+import static conexao_workbench.ConexaoForMySQL.getConexao;
+import java.sql.Connection;
+
+
+public class TestaConexao {
+       public static boolean testarConexao() {
+       Connection conexao = getConexao();
+       if (conexao != null) {
+           fecharConnection (conexao);
+           return true;
+       }
+       return false;
+   }
+}
