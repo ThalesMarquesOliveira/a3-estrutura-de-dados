@@ -1,0 +1,70 @@
+
+package estrutura;                                           // 1) Declara o pacote onde a fila está
+
+@SuppressWarnings("unchecked")                               // 2) Suprime avisos de “unchecked” no cast de array genérico
+public class FilaDinamica<E> implements Fila<E> {               // 3) Implementa a interface Fila usando um array circular
+
+private E[] data;                                       // 4) Array interno que armazena os elementos
+private int head = 0,                                  // 5) Índice do próximo elemento a ser removido
+            tail = 0,                                  //    Índice onde o próximo elemento será inserido
+            size = 0;                                  //    Quantidade atual de elementos
+private int capacity;                                   // 6) Capacidade atual do array
+
+public FilaDinamica() { this(10); }                        // 7) Construtor padrão, capacidade inicial = 10
+
+public FilaDinamica(int initialCapacity) {                 // 8) Construtor com capacidade definida pelo usuário
+    this.capacity = initialCapacity;                    // 8.1) Armazena a capacidade
+    this.data     = (E[]) new Object[capacity];         // 8.2) Cria o array de Object e faz cast para E[]
+}
+
+@Override
+public void enfileirar(E e) {                           // 9) enqueue: insere no fim da fila
+    ensureCapacity();                                   // 9.1) Garante espaço, dobrando array se cheio
+    data[tail] = e;                                     // 9.2) Coloca o elemento em `tail`
+    tail = (tail + 1) % capacity;                       // 9.3) Avança `tail` de forma circular
+    size++;                                             // 9.4) Incrementa o contador de elementos
+}
+
+private void ensureCapacity() {                         // 10) Se o array estiver cheio, dobra sua capacidade
+    if (size == capacity) {                             // 10.1) Checagem de “array cheio”
+        int newCap = capacity * 2;                      // 10.2) Nova capacidade = dobro da atual
+        E[] newData = (E[]) new Object[newCap];         // 10.3) Cria array maior
+        for (int i = 0; i < size; i++) {                // 10.4) Copia elementos na ordem FIFO
+            newData[i] = data[(head + i) % capacity];
+        }
+        data     = newData;                             // 10.5) Substitui o array interno
+        capacity = newCap;                              // 10.6) Atualiza a capacidade
+        head     = 0;                                   // 10.7) Realinha head para 0
+        tail     = size;                                // 10.8) tail fica logo após o último elemento
+    }
+}
+
+@Override
+public E desinfileirar() {                              // 11) dequeue: remove e retorna do início
+    if (size == 0)                                      // 11.1) Se a fila estiver vazia
+        return null;                                    // 11.2) Retorna null conforme contrato
+    E e = data[head];                                   // 11.3) Captura o valor em `head`
+    data[head] = null;                                  // 11.4) Limpa referência para GC
+    head = (head + 1) % capacity;                       // 11.5) Avança `head` de forma circular
+    size--;                                             // 11.6) Decrementa o contador
+    return e;                                           // 11.7) Retorna o elemento removido
+}
+
+@Override
+public boolean isEmpty() {                              // 12) Retorna true se não houver elementos
+    return size == 0;                                   // 12.1) Checa se `size` é zero
+}
+
+@Override
+public int Tamanho() {                                  // 13) Retorna a quantidade de elementos
+    return size;                                        // 13.1) Valor atual de `size`
+}
+
+@Override
+public void clear() {                                   // 14) Limpa todos os elementos da fila
+    for (int i = 0; i < size; i++) {                    // 14.1) Percorre as posições usadas
+        data[(head + i) % capacity] = null;             // 14.2) Remove referências para GC
+    }
+    head = tail = size = 0;                             // 14.3) Reseta índices e contador
+}
+} 
