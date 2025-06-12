@@ -1,0 +1,143 @@
+
+package estrutura;
+
+ public class Registro {
+
+private String nome;
+private String genero;
+private int idade;
+private String estado;
+private String cidade;
+private String tipoDaConta;
+private String dataTransacao;
+private Float valorTransacao;
+private String tipoDeTransacao;
+private String categoria;
+private String dispositivoDeTransacao;
+private String banco;
+private Boolean fraude;
+
+// Construtor 
+public Registro(String nome, String genero, int idade, String estado, String cidade, String banco , String tipoDaConta,
+                String dataTransacao, Float valorTransacao, String tipoDeTransacao, String categoria, String dispositivoDeTransacao, Boolean fraude) {
+    this.nome = nome;
+    this.genero = genero;
+    this.idade = idade;
+    this.estado = estado;
+    this.cidade = cidade;
+    this.tipoDaConta = tipoDaConta;
+    this.dataTransacao = dataTransacao;
+    this.valorTransacao = valorTransacao;
+    this.tipoDeTransacao = tipoDeTransacao;
+    this.categoria = categoria;
+    this.dispositivoDeTransacao = dispositivoDeTransacao;
+    this.banco = banco;
+    this.fraude = fraude;
+    
+}
+
+// Getters e Setters
+  public String getGenero() {
+      return genero;
+  }
+  
+  public void setGenero(String genero) {
+      this.genero = genero;
+  }
+  
+  public String getNome() {
+      return nome;
+  }
+  
+  public void setNome(String nome) {
+      this.nome = nome;
+  }
+  
+  public int getIdade() {
+      return idade;
+  }
+  
+  public void setIdade(int idade) {
+      this.idade = idade;
+  }
+  
+  public String getEstado() {
+      return estado;
+  }
+  
+  public void setEstado(String estado) {
+      this.estado = estado;
+  }
+  
+  public String getCidade() {
+      return cidade;
+  }
+  
+  public void setCidade(String cidade) {
+      this.cidade = cidade;
+  }
+  
+  public String getTipoDaConta() {
+      return tipoDaConta;
+  }
+  
+  public void setTipoDaConta(String tipodaconta) {
+      this.tipoDaConta = tipoDaConta;
+  }
+  
+  public String getDataTransacao() {
+      return dataTransacao;
+  }
+  
+  public void setDataTransacao(String dataTransacao) {
+      this.dataTransacao = dataTransacao;
+  }
+  
+  public String getTipoDeTransacao() {
+      return tipoDeTransacao;
+  }
+  
+  public void setTipoDeTransacao(String tipoDeTransacao) {
+      this.tipoDeTransacao = tipoDeTransacao;
+  }
+  
+  public String getCategoria() {
+      return categoria;
+  }
+  
+  public void setCategoria(String categoria) {
+      this.categoria = categoria;
+  }
+  
+  public String getDispositivoDeTransacao() {
+      return dispositivoDeTransacao;
+  }
+  
+  public void setDispositivoDeTransacao(String dispositivoDeTransacao) {
+      this.dispositivoDeTransacao = dispositivoDeTransacao;
+  }
+  
+  public String getbanco() {
+      return banco;
+  }
+  
+  public void setbanco(String banco) {
+      this.banco = banco;
+  }
+  
+  public boolean isFraude() { // Use is para booleanos
+      return fraude;
+  }
+  
+  public void setFraude(Boolean fraude) {
+      this.fraude = fraude;
+  }
+  
+  public Float getValorTransacao() {
+      return valorTransacao;
+  }
+  
+  public void setValoRTransacao(Float valorTransacao) {
+      this.valorTransacao = valorTransacao;
+  }
+}
