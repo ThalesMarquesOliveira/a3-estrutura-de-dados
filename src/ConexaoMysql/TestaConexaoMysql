@@ -1,0 +1,17 @@
+package conexao_Mysql;
+
+import static conexao_Mysql.FechaConexaoMysql.fecharConnection;
+import static conexao_Mysql.ConexaoForWorkBench.getConexao;
+import java.sql.Connection;
+
+
+public class TestaConexaoMysql {
+       public static boolean testarConexao() {
+       Connection conexao = getConexao();
+       if (conexao != null) {
+           fecharConnection (conexao);
+           return true;
+       }
+       return false;
+   }
+}
