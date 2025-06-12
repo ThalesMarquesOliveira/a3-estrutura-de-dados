@@ -1,0 +1,160 @@
+import conexao_Mysql.ConexaoForWorkBench;      // importa utilitário para conexão MySQL de leitura
+import conexao_Mysql.ConexaoForLooker;         // importa utilitário para conexão MySQL de escrita
+import interface_usuario.*;                    // importa todas as classes da interface de usuário
+import java.sql.Connection;                    // JDBC Connection
+import java.sql.PreparedStatement;             // JDBC PreparedStatement
+import java.sql.ResultSet;                     // JDBC ResultSet
+import java.sql.SQLException;                  // JDBC SQLException
+import estrutura.*;                            // importa classe Registro e estruturas de coleção
+import javax.swing.SwingUtilities;             // para disparar tarefas no Event Dispatch Thread do Swing
+
+public class Main {                             // classe principal da aplicação
+
+private static final double valorMinimoFraude = 1.0;    // valor mínimo para considerar uma transação como possível fraude
+private static final int    limiteRegistro   = 200000;  // número máximo de registros a serem lidos do DB
+
+public static void main(String[] args) {
+    Connection conexaoLeitura = null;        // referência à conexão de leitura (Workbench)
+    Connection conexaoEscrita = null;        // referência à conexão de escrita (Looker)
+    PreparedStatement stmtLeitura = null;    // PreparedStatement para consulta de leitura
+    PreparedStatement stmtEscrita = null;    // PreparedStatement para inserções de escrita
+    ResultSet resultado = null;              // ResultSet para armazenar resultados da consulta
+
+    Fila<Registro> filaRegistros = new FilaEncadeada();  // fila para enfileirar todos os registros lidos
+    Lista<Registro> naoFraudes  = new ListaEncadeada();  // lista para armazenar registros não classificados como fraude
+
+    try {
+        // 2. abrir conexão de leitura
+        conexaoLeitura = ConexaoForWorkBench.getConexao();  // obtém conexão MySQL para leitura
+
+        if (conexaoLeitura != null) {                      // verifica se a conexão foi estabelecida
+            System.out.println("Conexão de leitura estabelecida com sucesso!");
+
+            // prepara a instrução SQL para leitura de transações acima de um valor mínimo
+            String sqlLeitura =
+                "SELECT nome, genero, idade, estado, cidade, banco, tipodaconta, " +
+                "datatransacao, valortransacao, tipodetransacao, categoria, " +
+                "dispositivodetransacao, fraude " +
+                "FROM golpes WHERE valortransacao > ? LIMIT ?";
+
+            stmtLeitura = conexaoLeitura.prepareStatement(sqlLeitura);  // cria PreparedStatement de leitura
+            stmtLeitura.setDouble(1, valorMinimoFraude);                // define parâmetro de valor mínimo
+            stmtLeitura.setInt(2, limiteRegistro);                      // define parâmetro de limite de linhas
+
+            System.out.println("Executando consulta: " + sqlLeitura);
+            resultado = stmtLeitura.executeQuery();                     // executa a consulta SQL
+
+            // 4. ler e enfileirar todos os registros retornados
+            while (resultado.next()) {                                  // enquanto houver próximo registro
+                String  nome                 = resultado.getString("nome");                   // lê campo nome
+                String  genero               = resultado.getString("genero");                // lê campo gênero
+                int     idade                = resultado.getInt("idade");                    // lê campo idade
+                String  estado               = resultado.getString("estado");                // lê campo estado
+                String  cidade               = resultado.getString("cidade");                // lê campo cidade
+                String  banco                = resultado.getString("banco");                 // lê campo banco
+                String  tipoDaConta          = resultado.getString("tipodaconta");           // lê campo tipo da conta
+                String  dataTransacao        = resultado.getString("datatransacao");         // lê campo data da transação
+                float   valorTransacao       = resultado.getFloat("valortransacao");         // lê campo valor da transação
+                String  tipoDeTransacao      = resultado.getString("tipodetransacao");       // lê campo tipo de transação
+                String  categoria            = resultado.getString("categoria");             // lê campo categoria
+                String  dispositivoTransacao = resultado.getString("dispositivodetransacao"); // lê campo dispositivo
+                boolean fraude               = resultado.getBoolean("fraude");               // lê campo fraude
+
+                // cria objeto Registro com todos os campos lidos
+                Registro registro = new Registro(
+                    nome, genero, idade, estado, cidade, banco,
+                    tipoDaConta, dataTransacao, valorTransacao,
+                    tipoDeTransacao, categoria, dispositivoTransacao, fraude
+                );
+
+                filaRegistros.enfileirar(registro);    // adiciona registro à fila principal
+
+                if (!registro.isFraude()) {            // se não for fraude
+                    naoFraudes.add(registro);          // adiciona à lista de não-fraudes
+                }
+            }
+
+            // 5. filtrar apenas as fraudes retirando da fila principal
+            Fila<Registro> apenasFraudes = new FilaEncadeada();         // nova fila para registros de fraude
+            while (!filaRegistros.isEmpty()) {                           // enquanto a fila principal não estiver vazia
+                Registro r = filaRegistros.desinfileirar();             // remove próximo registro da fila
+                if (r.isFraude()) {                                     // se for fraude
+                    apenasFraudes.enfileirar(r);                        // adiciona à fila de fraudes
+                }
+            }
+
+            // 6. fechar recursos de leitura
+            if (resultado      != null) resultado.close();              // fecha ResultSet
+            if (stmtLeitura    != null) stmtLeitura.close();            // fecha PreparedStatement de leitura
+            if (conexaoLeitura != null) conexaoLeitura.close();         // fecha Connection de leitura
+            System.out.println("Conexão de leitura fechada.");
+
+            // 7. abrir conexão de escrita
+            conexaoEscrita = ConexaoForLooker.getConexao();             // obtém conexão MySQL para escrita
+
+            if (conexaoEscrita != null) {                               // verifica se a conexão de escrita foi obtida
+                System.out.println("Conexão de escrita estabelecida com sucesso!");
+
+                // dispara criação da interface gráfica na thread correta do Swing
+                SwingUtilities.invokeLater(() -> {
+                    tela_inicio tela = new tela_inicio();               // instancia a tela inicial
+                    tela.setLocationRelativeTo(null);                   // centraliza a tela
+                    tela.setVisible(true);                              // exibe a tela
+                });
+
+                // 8. prepara a instrução SQL de inserção de fraudes
+                String sqlEscrita =
+                    "INSERT INTO golpes (nome, genero, idade, estado, cidade, banco, tipodaconta, " +
+                    "datatransacao, valortransacao, tipodetransacao, categoria, " +
+                    "dispositivodetransacao, fraude) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+                stmtEscrita = conexaoEscrita.prepareStatement(sqlEscrita); // cria PreparedStatement de escrita
+
+                // 9. inserir cada registro de fraude no banco de escrita
+                while (!apenasFraudes.isEmpty()) {                        // enquanto houver fraudes na fila
+                    Registro fraude = apenasFraudes.desinfileirar();      // retira a próxima fraude
+
+                    // define cada parâmetro do INSERT com valores do objeto fraude
+                    stmtEscrita.setString(1, fraude.getNome());
+                    stmtEscrita.setString(2, fraude.getGenero());
+                    stmtEscrita.setInt(3, fraude.getIdade());
+                    stmtEscrita.setString(4, fraude.getEstado());
+                    stmtEscrita.setString(5, fraude.getCidade());
+                    stmtEscrita.setString(6, fraude.getbanco());
+                    stmtEscrita.setString(7, fraude.getTipoDaConta());
+                    stmtEscrita.setString(8, fraude.getDataTransacao());
+                    stmtEscrita.setFloat(9, fraude.getValorTransacao());
+                    stmtEscrita.setString(10, fraude.getTipoDeTransacao());
+                    stmtEscrita.setString(11, fraude.getCategoria());
+                    stmtEscrita.setString(12, fraude.getDispositivoDeTransacao());
+                    stmtEscrita.setBoolean(13, fraude.isFraude());
+
+                    stmtEscrita.executeUpdate();                          // executa o INSERT
+                }
+
+                System.out.println("Dados de fraude inseridos com sucesso no banco de dados de escrita!");
+            } else {
+                System.err.println("Falha ao conectar no banco de escrita."); // mensagem de erro se falhar
+            }
+
+            // exibir contagem ou lista final de fraudes (comentado para não duplicar)
+            System.out.println("Registros de fraude:");
+            // while (!apenasFraudes.isEmpty()) System.out.println(apenasFraudes.desinfileirar());
+
+        } else {
+            System.err.println("Falha ao conectar no banco de leitura.");   // mensagem de erro se falhar
+        }
+
+    } catch (SQLException e) {                                           // captura exceções SQL
+        System.err.println("Erro em JDBC: " + e.getMessage());            // exibe mensagem de erro
+    } finally {
+        // 9. liberar recursos de escrita
+        try {
+            if (stmtEscrita     != null) stmtEscrita.close();             // fecha PreparedStatement de escrita
+            if (conexaoEscrita  != null) conexaoEscrita.close();          // fecha Connection de escrita
+        } catch (SQLException e) {
+            System.err.println("Erro ao fechar recursos: " + e.getMessage()); // trata erros de fechamento
+        }
+    }
+}
+}
