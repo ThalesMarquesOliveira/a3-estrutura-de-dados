@@ -37,7 +37,7 @@ Os dados são armazenados em **estruturas de dados implementadas manualmente** e
 ### ✅ Fila
 
 - `Fila.java`: fila sequencial
-- `FilaEncadeada.java`: fila dinamica
+- `FilaDinamica.java`: fila dinamica
 
 Essas estruturas foram utilizadas para ler, armazenar e preparar os dados antes da persistência no banco.
 
