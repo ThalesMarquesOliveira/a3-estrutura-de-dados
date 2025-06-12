@@ -1,0 +1,54 @@
+
+package estrutura;
+
+        @SuppressWarnings("unchecked")
+public class FilaEncadeada<E> implements Fila<E> {
+   private static class Node<E> {
+       E value;
+       Node<E> next;
+       Node(E v){ this.value = v; }
+   }
+
+   private Node<E> comeco;  // retirada
+   private Node<E> fim;  // inserção
+   private int tamanho;
+
+   @Override
+   public void enfileirar(E e) {
+       Node<E> novo = new Node(e);
+       if (fim != null) {
+           fim.next = novo;
+       } else {
+           comeco = novo;
+       }
+       fim = novo;
+       tamanho++;
+   }
+
+   @Override
+   public E desinfileirar() {
+       if (comeco == null) return null;
+       E v = comeco.value;
+       comeco = comeco.next;
+       if (comeco == null) fim = null;
+       tamanho--;
+       return v;
+   }
+
+   @Override
+   public boolean isEmpty() {
+       return comeco == null;
+   }
+
+   @Override
+   public int Tamanho() {
+       return tamanho;
+   }
+
+   @Override
+   public void clear() {
+       comeco = fim = null;
+       tamanho = 0;
+   }
+    
+}
