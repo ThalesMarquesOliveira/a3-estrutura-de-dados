@@ -125,7 +125,7 @@ public Registro(String nome, String genero, int idade, String estado, String cid
       this.banco = banco;
   }
   
-  public boolean isFraude() { // Use is para booleanos
+  public boolean isFraude() { 
       return fraude;
   }
   
