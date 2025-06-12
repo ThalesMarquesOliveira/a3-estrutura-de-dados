@@ -1,0 +1,13 @@
+package estrutura;
+
+public interface Lista<E> {
+    boolean add(E e);                        // Tenta adicionar; retorna true se não existia ainda. 
+
+   boolean remove(E e);                      // Remove o elemento; true se existia e foi removido. 
+
+   boolean contains(E e);                    // Verifica se o elemento está presente. 
+
+   int size();                               // Quantos elementos há no conjunto. 
+
+   void clear();                             // Remove todos os elementos. 
+}
