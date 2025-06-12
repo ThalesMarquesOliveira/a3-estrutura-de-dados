@@ -1,17 +1,16 @@
-package conexao_Mysql;
+package conexao_Mysql;                                           // Declara o pacote onde esta classe está localizada
 
-import static conexao_Mysql.FechaConexaoMysql.fecharConnection;
-import static conexao_Mysql.ConexaoForWorkBench.getConexao;
-import java.sql.Connection;
+import static conexao_Mysql.FechaConexaoMysql.fecharConnection;   // Importa estaticamente o método fecharConnection() da classe FechaConexaoMysql
+import static conexao_Mysql.ConexaoForWorkBench.getConexao;      // Importa estaticamente o método getConexao() da classe ConexaoForWorkBench
+import java.sql.Connection;                                      // Importa a interface Connection do JDBC
 
-
-public class TestaConexaoMysql {
-       public static boolean testarConexao() {
-       Connection conexao = getConexao();
-       if (conexao != null) {
-           fecharConnection (conexao);
-           return true;
-       }
-       return false;
-   }
+public class TestaConexaoMysql {                                // Declaração da classe responsável por testar a conexão MySQL
+public static boolean testarConexao() {                      // Método público estático que retorna true se a conexão for bem-sucedida
+       Connection conexao = getConexao();                      // Chama getConexao() para abrir a conexão com o banco
+       if (conexao != null) {                                  // Verifica se o objeto Connection não é nulo (conexão estabelecida)
+        fecharConnection(conexao);                         // Fecha a conexão usando fecharConnection()
+        return true;                                        // Retorna true indicando que o teste de conexão foi bem-sucedido
+    }
+    return false;                                           // Retorna false caso a conexão seja nula (não estabelecida)
 }
+}                                                              // Fim da classe TestaConexaoMysql
